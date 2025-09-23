@@ -53,11 +53,47 @@ There are 10 testing data (5 public, 5 private).
 ## References
 Please provide the code along with its reference. For example, you can cite it as: ```# ChatGPT, respond to “your prompt,” on February 16, 2023```. Below is an example of a reference format summarizing the use of ChatGPT for R programming
 
->You are the R Language expert.
->Please help me to write a function call “k_fold” .
->Using given dataset to train the random forest model, and use the k-fold cross- validation to evaluate the best model parameters. Here is the instruction of the function requirements:\
->Function name: k_fold\
->Function parameters:
->1. k: the number of how much fold to split the dataset doing the k-fold cross- validation.
->2. input_file: input csv file path.
->3. output_file: output path of k-fold cross-validation result.
+ChatGPT 討論連結 : 
+https://chatgpt.com/share/68c96923-2f54-800a-9b6c-f3a360f0aa8e
+
+其他部分問答 : 
+ChatGPT, respond to "假設已經有一個觀察到的次數矩陣 跟各胺基酸的背景頻率 求變異率與 λ在python要怎麼進行"
+>在 Python 的實作範例
+>下面是一個示範程式骨架，用來算 m[j] 和 λ。
+```python
+import numpy as np
+
+# 假設 amino acids 是 index 0..19
+# A is a 20×20 numpy array, A[i][j] = count: original j → replaced by i
+# f is a length-20 numpy array, background frequencies for j (sum f = 1)
+
+def compute_mutability_and_lambda(A, f):
+    # A is 2D array shape (20,20)
+    A = np.array(A, dtype=float)
+    f = np.array(f, dtype=float)
+    assert A.shape[0] == A.shape[1] == len(f)
+
+    # compute n_j = total occurrences of amino acid j
+    # that's the sum over i of A[i][j]
+    n_j = np.sum(A, axis=0)  # sum down rows for each column j
+
+    # compute mutability m[j] = (sum over i≠j of A[i][j]) / n_j
+    # i ≠ j means subtract diagonal
+    diag = np.diag(A)
+    off_diag_sum = n_j - diag
+    m = off_diag_sum / n_j  # array length 20
+
+    # then compute lambda so that expected mutation rate per site = target, e.g. target = 0.01
+    target_mutation_rate = 0.01
+    # sum over j of f[j] * m[j]
+    weighted = np.dot(f, m)  # this is Σ_j f_j * m_j
+    lam = target_mutation_rate / weighted
+
+    return m, lam
+
+# Example usage:
+# A = ... fill with your observed count matrix
+# f = ... background frequencies
+# m, lambda_value = compute_mutability_and_lambda(A, f)
+# print(m, lambda_value)
+```

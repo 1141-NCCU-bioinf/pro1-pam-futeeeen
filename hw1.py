@@ -4,9 +4,7 @@ import numpy as np
 def generate_pam(x, input_path, output_path):
     # 讀檔案
     matrix = np.loadtxt(input_path, skiprows=2, usecols=range(1, 21))
-    
-    for row in matrix:
-        print(row)
+    M = matrix/10000
     
     # 背景頻率
     frequencies = {
@@ -21,10 +19,10 @@ def generate_pam(x, input_path, output_path):
         order = lines[1].strip().split()
     # 進行排序
     freq = np.array([frequencies[aa] for aa in order])
-#    freq = freq/sum(freq)
+    #freq = freq/sum(freq)
     print(order)
 
-
+    '''
     # 計算發生突變的總次數
     # 每列合計
     n_j = np.sum(matrix, axis=0)  # sum down rows for each column j
@@ -51,47 +49,40 @@ def generate_pam(x, input_path, output_path):
                 M[i, j] = lam * (matrix[i, j] / n_j[j])
         # 對角
         M[j, j] = 1.0 - lam * m[j]
- 
+    '''
     # PAMx
     PAMx = np.linalg.matrix_power(M, x)
     
-    print(PAMx.sum(axis=0))
+    ##print(PAMx.sum(axis=0))
   
     # log-odds score
     with np.errstate(divide='ignore', invalid='ignore'):
     
-        #ratio = PAMx / freq[:, np.newaxis]
         ratio = PAMx / freq[:, None]
         
         score_matrix = 10 * np.log10(ratio)
         # ChatGPT > 可選：將無定義或 -inf 的地方設成很小的值或某個預設 score
 
-    
+
     # 產檔案
     with open(output_path, "w") as f_out:
         f_out.write("   " + " ".join(order) + "\n")
         for i, aa in enumerate(order):
-            row = " ".join(f"{round_half_up(val):3d}" for val in score_matrix[i])
+            row = " ".join(f"{int(np.round(val)):3d}" for val in score_matrix[i])
             f_out.write(f"{aa} {row}\n")
    
-    idx_R = order.index('R')
-    idx_V = order.index('V')
+    #idx_R = order.index('R')
+    #idx_V = order.index('Y')
 
-    p_RV = PAMx[idx_R, idx_V]
-    fR = freq[idx_R]
-    ratio_RV = p_RV / fR
-    score_float = 10 * np.log10(ratio_RV)
+    #p_RV = PAMx[idx_R, idx_V]
+    #fR = freq[idx_R]
+    #ratio_RV = p_RV / fR
+    #score_float = 10 * np.log10(ratio_RV)
        
-    print("DEBUG R->Y:")
-    print("PAMx[R,Y] =", p_RV)
-    print("freq[R] =", fR)
-    print("ratio =", ratio_RV)
-    print("score (float) =", score_float)
-    print("rounded score =", round_half_up(score_float))
-    
-def round_half_up(x):
-    if x > 0:
-        return int(np.floor(x + 0.5))  # 四捨五入
-    else:
-        return int(np.ceil(x - 0.5))   # 負數朝零
+    #print("DEBUG R->Y:")
+    #print("PAMx[R,Y] =", p_RV)
+    #print("freq[R] =", fR)
+    #print("ratio =", ratio_RV)
+    #print("score (float) =", score_float)
+    #print("rounded score =", np.round(score_float))
 
